@@ -1,0 +1,11 @@
+definitions:
+  - https:///definitions/unix.yaml
+  - https:///definitions/system.yaml
+  - https:///definitions/generated.yaml
+
+variable_filters:
+  one_of:
+    - ROOT_VARIABLES
+  none_of:
+    - DATABASE_VARIABLES
+    - UNIX_RESERVED_VARIABLES

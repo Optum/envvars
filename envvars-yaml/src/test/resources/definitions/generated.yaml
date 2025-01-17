@@ -1,0 +1,11 @@
+variable_filters:
+  ROOT_VARIABLES:
+    regex: "^R_.+$"
+    name: Root Variables
+    description: Begins with R_
+    usage: Reserved for system-defined root variables.
+  GENERATED_VARIABLES:
+    regex: "^G_.+$"
+    name: Generated Variables
+    description: Begins with G_
+    usage: Reserved for system-generated variables.

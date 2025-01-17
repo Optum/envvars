@@ -1,0 +1,7 @@
+environments:
+  - alpha
+  - bravo
+  - delta:
+      id: something
+      name: else
+  - production
