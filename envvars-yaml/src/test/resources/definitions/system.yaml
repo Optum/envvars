@@ -1,0 +1,14 @@
+node_types:
+  ENVIRONMENT_NODE_TYPE:
+    name: Environment
+  COMPONENT_NODE_TYPE:
+    name: Component
+  CLOUDPROVIDER_NODE_TYPE:
+    name: Cloud Provider
+
+variable_filters:
+  DATABASE_VARIABLES:
+    regex: "^.+(?:_BASEURL|_HOST|_PORT)$"
+    name: Database Variables
+    description: Ends in _BASEURL, _HOST or _PORT
+    usage: Variables used for defining databases.

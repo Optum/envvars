@@ -1,0 +1,11 @@
+variable_filters:
+  UNIX_SHELL_VARIABLES:
+    regex: "[a-zA-Z_]+[a-zA-Z0-9_]*"
+    name: Unix Shell Variables
+    description: Upper case, lower case, digits and underscore; must not begin with a digit.
+    usage: An application environment variable compatible with standard Unix shells.
+  UNIX_RESERVED_VARIABLES:
+    regex: "HISTORY|HOME|PATH|USER"
+    name: Unix Reserved Variables
+    description: HISTORY, HOME, PATH and other reserved Unix variables.
+    usage: These variables are commonly used by Unix shells and systems and must not be set by an application.

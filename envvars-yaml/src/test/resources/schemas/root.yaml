@@ -1,0 +1,15 @@
+definitions:
+  - https:///definitions/unix.yaml
+  - https:///definitions/system.yaml
+  - https:///definitions/generated.yaml
+
+node_type: CLOUDPROVIDER_NODE_TYPE
+
+variable_filters:
+  all_of:
+    - UNIX_SHELL_VARIABLES
+  one_of:
+    - ROOT_VARIABLES
+  none_of:
+    - DATABASE_VARIABLES
+    - UNIX_RESERVED_VARIABLES

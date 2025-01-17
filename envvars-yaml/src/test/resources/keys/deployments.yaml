@@ -1,0 +1,8 @@
+cloudProviders:
+  - aws
+  - gcp
+
+environments:
+  - alpha
+  - dev
+  - production

@@ -1,0 +1,10 @@
+definitions:
+  - https:///definitions/unix.yaml
+  - https:///definitions/system.yaml
+  - https:///definitions/generated.yaml
+
+variable_filters:
+  all_of:
+    - UNIX_SHELL_VARIABLES
+  one_of:
+    - ROOT_VARIABLES
