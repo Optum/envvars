@@ -1,9 +1,9 @@
-<Insert Project Name Here>
-Copyright 2024 Optum
+Envvars
+Copyright 2025 Optum
 
 Project Description:
 ====================
-<Short description of your project>
+Library of kernel functionality for implementing an application environment variable processing system.
 
 Author(s):
-<List the names and GitHub IDs of the original project authors>
+JohnMThayer
