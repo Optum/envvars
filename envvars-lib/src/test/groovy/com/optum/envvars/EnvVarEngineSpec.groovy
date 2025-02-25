@@ -832,6 +832,20 @@ class EnvVarEngineSpec extends Specification {
         results.get("MYDATABASE_Main") == "https://Main:3306"
     }
 
+    final Map uppercaseDefineSetsParam = ["Database": ['MYDATABASE_{{^$1}}': 'https://{{^$1}}:3306']]
+
+    def "Parameterized Uppercase Declares"() {
+        when:
+        EnvVarsStaticSets envVarsStaticSets = new EnvVarsStaticSets(Collections.emptyMap(), uppercaseDefineSetsParam)
+        EnvVarsEngine envVarsEngine = new EnvVarsEngine(envVarsStaticSets)
+        EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "dev", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
+        final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, declareParam)
+        envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
+        Map<String, String> results = envVarsEngine.generateBridgeData()
+        then:
+        results.get("MYDATABASE_MAIN") == "https://MAIN:3306"
+    }
+
     final Map declareCascade = new JsonSlurper().parseText(
             """{
 "environments": {

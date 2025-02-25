@@ -91,6 +91,7 @@ public class EnvVarsStaticSets {
             String arg = rawarg.trim();
             boolean foundOneOfThisArg = false;
             final String argHolder = "{{$" + (whichArg) + "}}";
+            final String uppercaseArgHolder = "{{^$" + (whichArg) + "}}";
 
             // Replace keys
             for(int i=0; i<count; i++) {
@@ -98,6 +99,10 @@ public class EnvVarsStaticSets {
                 if (key.contains(argHolder)) {
                     foundOneOfThisArg = true;
                     String newValue = key.replace(argHolder, arg);
+                    keys.set(i, newValue);
+                } else if (key.contains(uppercaseArgHolder)) {
+                    foundOneOfThisArg = true;
+                    String newValue = key.replace(uppercaseArgHolder, arg.toUpperCase());
                     keys.set(i, newValue);
                 }
             }
@@ -108,6 +113,10 @@ public class EnvVarsStaticSets {
                 if (value.contains(argHolder)) {
                     foundOneOfThisArg = true;
                     String newValue = value.replace(argHolder, arg);
+                    values.set(i, newValue);
+                } else if (value.contains(uppercaseArgHolder)) {
+                    foundOneOfThisArg = true;
+                    String newValue = value.replace(uppercaseArgHolder, arg.toUpperCase());
                     values.set(i, newValue);
                 }
             }
@@ -208,11 +217,16 @@ public class EnvVarsStaticSets {
             String arg = rawarg.trim();
             boolean foundOneOfThisArg = false;
             final String argHolder = "{{$" + (whichArg) + "}}";
+            final String uppercaseArgHolder = "{{^$" + (whichArg) + "}}";
             for(int i=0; i<values.size(); i++) {
                 String value = values.get(i);
                 if (value.contains(argHolder)) {
                     foundOneOfThisArg = true;
                     String newValue = value.replace(argHolder, arg);
+                    values.set(i, newValue);
+                } else if (value.contains(uppercaseArgHolder)) {
+                    foundOneOfThisArg = true;
+                    String newValue = value.replace(uppercaseArgHolder, arg.toUpperCase());
                     values.set(i, newValue);
                 }
             }
