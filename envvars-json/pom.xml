@@ -12,6 +12,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <name>envvars-json</name>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

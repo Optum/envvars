@@ -12,6 +12,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <name>envvars-cli</name>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
