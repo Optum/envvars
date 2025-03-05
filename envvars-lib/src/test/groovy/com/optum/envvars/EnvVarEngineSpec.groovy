@@ -813,12 +813,15 @@ class EnvVarEngineSpec extends Specification {
         ]
     }, 
     "dev": {
+        "declare": [
+            "Database<  >"
+        ]
     }
 }
 }"""
     ) as Map
 
-    final Map defineSetsParam = ["Database": ['MYDATABASE_{{$1}}': 'https://{{$1}}:3306']]
+    final Map defineSetsParam = ["Database": ['MYDATABASE{{_$1}}': 'https://{{$1}}:3306']]
 
     def "Parameterized Declares"() {
         when:
@@ -830,9 +833,10 @@ class EnvVarEngineSpec extends Specification {
         Map<String, String> results = envVarsEngine.generateBridgeData()
         then:
         results.get("MYDATABASE_Main") == "https://Main:3306"
+        results.get("MYDATABASE") == "https://:3306"
     }
 
-    final Map uppercaseDefineSetsParam = ["Database": ['MYDATABASE_{{^$1}}': 'https://{{^$1}}:3306']]
+    final Map uppercaseDefineSetsParam = ["Database": ['MYDATABASE{{_^$1}}': 'https://{{^$1}}:3306']]
 
     def "Parameterized Uppercase Declares"() {
         when:
@@ -844,6 +848,36 @@ class EnvVarEngineSpec extends Specification {
         Map<String, String> results = envVarsEngine.generateBridgeData()
         then:
         results.get("MYDATABASE_MAIN") == "https://MAIN:3306"
+    }
+
+    final Map missingKeySetsParam = ["Database": ['MYDATABASE{{_$2}}': 'https://{{$1}}:3306']]
+
+    def "Parameterized Declares with Missing Argument in Key"() {
+        when:
+        EnvVarsStaticSets envVarsStaticSets = new EnvVarsStaticSets(Collections.emptyMap(), missingKeySetsParam)
+        EnvVarsEngine envVarsEngine = new EnvVarsEngine(envVarsStaticSets)
+        EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "dev", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
+        final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, declareParam)
+        envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
+        envVarsEngine.generateBridgeData()
+        then:
+        EnvVarsException ex = thrown()
+        ex.message == 'Parameterized Inject Set "Database" was invoked with argument list "[  Main  ]" but the arguments list does not contain a use of "$2" for set key 1: "MYDATABASE{{_$2}}"'
+    }
+
+    final Map missingValueSetsParam = ["Database": ['MYDATABASE{{_$1}}': 'https://{{$2}}:3306']]
+
+    def "Parameterized Declares with Missing Argument in Value"() {
+        when:
+        EnvVarsStaticSets envVarsStaticSets = new EnvVarsStaticSets(Collections.emptyMap(), missingValueSetsParam)
+        EnvVarsEngine envVarsEngine = new EnvVarsEngine(envVarsStaticSets)
+        EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "dev", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
+        final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, declareParam)
+        envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
+        envVarsEngine.generateBridgeData()
+        then:
+        EnvVarsException ex = thrown()
+        ex.message == 'Parameterized Inject Set "Database" was invoked with argument list "[  Main  ]" but the arguments list does not contain a use of "$2" for set value 1: "https://{{$2}}:3306"'
     }
 
     final Map declareCascade = new JsonSlurper().parseText(

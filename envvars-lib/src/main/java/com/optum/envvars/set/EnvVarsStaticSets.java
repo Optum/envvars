@@ -1,6 +1,10 @@
 package com.optum.envvars.set;
 
 import com.optum.envvars.EnvVarsException;
+import com.optum.templ.MapDelegateTemplDataSource;
+import com.optum.templ.TemplEngine;
+import com.optum.templ.exceptions.MissingKeyTemplException;
+import com.optum.templ.exceptions.TemplException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,46 +89,42 @@ public class EnvVarsStaticSets {
             values.add(entry.getValue());
         }
 
+        final Map<String, String> argsMap = new HashMap<>();
+        for(int whichArg = 0; whichArg < args.length; whichArg++) {
+            // Array index is 0-based
+            final String arg = args[whichArg].trim();
+            // This is the argument key syntax which is 1-based
+            argsMap.put("$"+(whichArg+1), arg);
+        }
 
-        int whichArg = 1;
-        for(String rawarg : args) {
-            String arg = rawarg.trim();
-            boolean foundOneOfThisArg = false;
-            final String argHolder = "{{$" + (whichArg) + "}}";
-            final String uppercaseArgHolder = "{{^$" + (whichArg) + "}}";
+        MapDelegateTemplDataSource ds = new MapDelegateTemplDataSource(argsMap);
+        TemplEngine te = new TemplEngine(ds);
 
-            // Replace keys
-            for(int i=0; i<count; i++) {
-                String key = keys.get(i);
-                if (key.contains(argHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = key.replace(argHolder, arg);
-                    keys.set(i, newValue);
-                } else if (key.contains(uppercaseArgHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = key.replace(uppercaseArgHolder, arg.toUpperCase());
-                    keys.set(i, newValue);
-                }
+
+        // Replace keys
+        for(int i=0; i<count; i++) {
+            String key = keys.get(i);
+            try {
+                final String newValue = te.processTemplate(key);
+                keys.set(i, newValue);
+            } catch (MissingKeyTemplException e) {
+                throw new EnvVarsException("Parameterized Inject Set \"" + setKey + "\" was invoked with argument list \"" + Arrays.asList(args) + "\" but the arguments list does not contain a use of \"" + e.getKey() + "\" for set key " + (i+1) + ": \""+ key + "\"");
+            } catch (TemplException e) {
+                throw new EnvVarsException(e.getMessage());
             }
+        }
 
-            // Replace values
-            for(int i=0; i<count; i++) {
-                String value = values.get(i);
-                if (value.contains(argHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = value.replace(argHolder, arg);
-                    values.set(i, newValue);
-                } else if (value.contains(uppercaseArgHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = value.replace(uppercaseArgHolder, arg.toUpperCase());
-                    values.set(i, newValue);
-                }
+        // Replace values
+        for(int i=0; i<count; i++) {
+            String value = values.get(i);
+            try {
+                final String newValue = te.processTemplate(value);
+                values.set(i, newValue);
+            } catch (MissingKeyTemplException e) {
+                throw new EnvVarsException("Parameterized Inject Set \"" + setKey + "\" was invoked with argument list \"" + Arrays.asList(args) + "\" but the arguments list does not contain a use of \"" + e.getKey() + "\" for set value " + (i+1) + ": \""+ value + "\"");
+            } catch (TemplException e) {
+                throw new EnvVarsException(e.getMessage());
             }
-
-            if (!foundOneOfThisArg) {
-                throw new EnvVarsException("Parameterized Inject Set \"" + setKey + "\" was invoked with argument list \"" + Arrays.asList(args) + "\" but the definition does not contain a use of \"" + argHolder + "\".  Set values are: " + source);
-            }
-            whichArg++;
         }
 
         // Glue it back together
