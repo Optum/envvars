@@ -85,44 +85,21 @@ public class EnvVarsStaticSets {
             values.add(entry.getValue());
         }
 
-
         int whichArg = 1;
         for(String rawarg : args) {
             String arg = rawarg.trim();
             boolean foundOneOfThisArg = false;
-            final String argHolder = "{{$" + (whichArg) + "}}";
-            final String uppercaseArgHolder = "{{^$" + (whichArg) + "}}";
 
-            // Replace keys
-            for(int i=0; i<count; i++) {
-                String key = keys.get(i);
-                if (key.contains(argHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = key.replace(argHolder, arg);
-                    keys.set(i, newValue);
-                } else if (key.contains(uppercaseArgHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = key.replace(uppercaseArgHolder, arg.toUpperCase());
-                    keys.set(i, newValue);
-                }
+            if (argSwap(whichArg, arg, keys)) {
+                foundOneOfThisArg = true;
             }
 
-            // Replace values
-            for(int i=0; i<count; i++) {
-                String value = values.get(i);
-                if (value.contains(argHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = value.replace(argHolder, arg);
-                    values.set(i, newValue);
-                } else if (value.contains(uppercaseArgHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = value.replace(uppercaseArgHolder, arg.toUpperCase());
-                    values.set(i, newValue);
-                }
+            if (argSwap(whichArg, arg, values)) {
+                foundOneOfThisArg = true;
             }
 
             if (!foundOneOfThisArg) {
-                throw new EnvVarsException("Parameterized Inject Set \"" + setKey + "\" was invoked with argument list \"" + Arrays.asList(args) + "\" but the definition does not contain a use of \"" + argHolder + "\".  Set values are: " + source);
+                throw new EnvVarsException("Parameterized Inject Set \"" + setKey + "\" was invoked with argument list \"" + Arrays.asList(args) + "\" but the definition does not contain a use of \"$" + whichArg + "\".  Set values are: " + source);
             }
             whichArg++;
         }
@@ -134,6 +111,47 @@ public class EnvVarsStaticSets {
             results.put(key, value);
         }
         return results;
+    }
+
+    private boolean argSwap(int argNumber, String value, List<String> strings) {
+        boolean foundOneOfThisArg = false;
+
+        final String DELIMITERS = "[ ,.;:?&@#/()<>_\\-\\\\|]";
+        final Pattern PREFIX_PATTERN = Pattern.compile("(" + DELIMITERS + "*)(\\^?)");
+        final Pattern SUFFIX_PATTERN = Pattern.compile("(" + DELIMITERS + "*)");
+        final String variable = "\\$" + argNumber;
+        final Pattern TEMPLATE_PATTERN = Pattern.compile("\\{\\{" + PREFIX_PATTERN + "(" + variable + ")" + SUFFIX_PATTERN + "}}");
+
+        // Replace keys
+        for(int i=0; i<strings.size(); i++) {
+            String key = strings.get(i);
+            String intermediateValue = key;
+            Matcher matcher = TEMPLATE_PATTERN.matcher(intermediateValue);
+            while (matcher.find()) {
+                foundOneOfThisArg = true;
+                String prefix = matcher.group(1);
+                String uppercase = matcher.group(2);
+                // String templateVar = matcher.group(3);
+                String suffix = matcher.group(4);
+                int start = matcher.start();
+                int end = matcher.end();
+                boolean toUpper = "^".equals(uppercase);
+                String replacement;
+                if (value.isEmpty()) {
+                    replacement = "";
+                } else {
+                    StringBuilder sb = new StringBuilder(prefix.length() + value.length() + suffix.length());
+                    sb.append(prefix);
+                    sb.append(toUpper ? value.toUpperCase() : value);
+                    sb.append(suffix);
+                    replacement = sb.toString();
+                }
+                intermediateValue = intermediateValue.substring(0, start) + replacement + intermediateValue.substring(end);
+                matcher = TEMPLATE_PATTERN.matcher(intermediateValue);
+            }
+            strings.set(i, intermediateValue);
+        }
+        return foundOneOfThisArg;
     }
 
     private Map<String, String> processSimpleDefineSetReference(String simpleKey) {

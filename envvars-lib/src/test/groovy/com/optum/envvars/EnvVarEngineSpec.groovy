@@ -880,6 +880,117 @@ class EnvVarEngineSpec extends Specification {
         results.get("MYRABBIT_MQ") == "https://MQ:5672"
     }
 
+    final Map defineComplexArguments = new JsonSlurper().parseText(
+            """{
+"environments": {
+    "dev": {
+        "define": {
+            "NORMAL" : "pizza"
+        },
+        "declare": [
+            "Set< x , y>"
+        ]
+    }
+}
+}"""
+    ) as Map
+
+    final Map defineSetsComplexArguments = ["Set":
+       ['KEY{{$1}}': 'VALUE{{$2}}',
+       'KEY{{^$1}}': 'VALUE{{$2}}',
+       'KEY{{$1}}{{_^$2}}': 'VALUE{{^$2}}',
+       'KEY{{_^$1}}': 'VALUE{{NORMAL}}',
+       'KEY{{_.,#$1:?}}': 'VALUE{{(@,$2;:)}}']
+    ]
+
+    def "Resolve Complex Arguments"() {
+        when:
+        EnvVarsStaticSets envVarsStaticSets = new EnvVarsStaticSets(Collections.emptyMap(), defineSetsComplexArguments)
+        EnvVarsEngine envVarsEngine = new EnvVarsEngine(envVarsStaticSets)
+        EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "dev", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
+        final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, defineComplexArguments)
+        envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
+        Map<String, String> results = envVarsEngine.generateBridgeData()
+        then:
+        results.get("KEYx") == "VALUEy"
+        results.get("KEYX") == "VALUEy"
+        results.get("KEYx_Y") == "VALUEY"
+        results.get("KEY_X") == "VALUEpizza"
+        results.get("KEY_.,#x:?") == "VALUE(@,y;:)"
+    }
+
+    final Map defineEmptyComplexArguments = new JsonSlurper().parseText(
+            """{
+"environments": {
+    "dev": {
+        "define": {
+            "NORMAL" : "pizza"
+        },
+        "declare": [
+            "Set< x ,  >"
+        ]
+    }
+}
+}"""
+    ) as Map
+
+    final Map defineSetsEmptyComplexArguments = ["Set":
+       ['KEY{{$1}}': 'VALUE{{$2}}',
+       'KEY{{^$1}}': 'VALUE{{$2}}',
+       'KEY{{$1}}{{_^$2}}': 'VALUE{{^$2}}',
+       'KEY{{_^$1}}{{_^$2}}': 'VALUE{{^$2}}{{NORMAL}}',
+       'KEY{{_.,#$1:?}}': 'VALUE{{(@,$2;:)}}']
+    ]
+
+    def "Resolve Empty Complex Arguments"() {
+        when:
+        EnvVarsStaticSets envVarsStaticSets = new EnvVarsStaticSets(Collections.emptyMap(), defineSetsEmptyComplexArguments)
+        EnvVarsEngine envVarsEngine = new EnvVarsEngine(envVarsStaticSets)
+        EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "dev", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
+        final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, defineEmptyComplexArguments)
+        envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
+        Map<String, String> results = envVarsEngine.generateBridgeData()
+        then:
+        results.get("KEYx") == "VALUE"
+        results.get("KEYX") == "VALUE"
+        results.get("KEYx") == "VALUE"
+        results.get("KEY_X") == "VALUEpizza"
+        results.get("KEY_.,#x:?") == "VALUE"
+    }
+
+        final Map defineEmptyComplexExtraArguments = new JsonSlurper().parseText(
+            """{
+"environments": {
+    "dev": {
+        "define": {
+            "NORMAL" : "pizza"
+        },
+        "declare": [
+            "Set< x ,  , >"
+        ]
+    }
+}
+}"""
+    ) as Map
+
+        final Map defineSetsEmptyComplexExtraArguments = ["Set":
+       ['KEY{{$1}}': 'VALUE{{$2}}']
+    ]
+
+    def "Resolve Empty Complex Extra Arguments"() {
+        when:
+        EnvVarsStaticSets envVarsStaticSets = new EnvVarsStaticSets(Collections.emptyMap(), defineSetsEmptyComplexExtraArguments)
+        EnvVarsEngine envVarsEngine = new EnvVarsEngine(envVarsStaticSets)
+        EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "dev", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
+        final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, defineEmptyComplexExtraArguments)
+        envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
+        envVarsEngine.generateBridgeData()
+        then:
+        EnvVarsException ex = thrown()
+        ex.message == 'Parameterized Inject Set "Set" was invoked with argument list "[ x ,   ,  ]" but the definition does not contain a use of "$3".  Set values are: {KEY{{$1}}=VALUE{{$2}}}'
+    }
+
+
     final Map inlineSkipInject = new JsonSlurper().parseText(
             """{
 "environments": {
