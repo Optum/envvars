@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.optum.envvars</groupId>
         <artifactId>envvars</artifactId>
-        <version>2.1.X-SNAPSHOT</version>
+        <version>2.2.X-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
