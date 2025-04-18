@@ -888,7 +888,7 @@ class EnvVarEngineSpec extends Specification {
             "NORMAL" : "pizza"
         },
         "declare": [
-            "Set< x , y>"
+            "Set< x , y, a-b >"
         ]
     }
 }
@@ -900,7 +900,9 @@ class EnvVarEngineSpec extends Specification {
        'KEY{{^$1}}': 'VALUE{{$2}}',
        'KEY{{$1}}{{_^$2}}': 'VALUE{{^$2}}',
        'KEY{{_^$1}}': 'VALUE{{NORMAL}}',
-       'KEY{{_.,#$1:?}}': 'VALUE{{(@,$2;:)}}']
+       'KEY{{_.,#$1:?}}': 'VALUE{{(@,$2;:)}}',
+       'KEY{{^$3}}' : 'VALUE{{$3}}',
+       'KEY{{$3}}' : 'VALUE{{^$3}}']
     ]
 
     def "Resolve Complex Arguments"() {
@@ -917,6 +919,8 @@ class EnvVarEngineSpec extends Specification {
         results.get("KEYx_Y") == "VALUEY"
         results.get("KEY_X") == "VALUEpizza"
         results.get("KEY_.,#x:?") == "VALUE(@,y;:)"
+        results.get("KEYA_B") == "VALUEa-b"
+        results.get("KEYa-b") == "VALUEA_B"
     }
 
     final Map defineEmptyComplexArguments = new JsonSlurper().parseText(

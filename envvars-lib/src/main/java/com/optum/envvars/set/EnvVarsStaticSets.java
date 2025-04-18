@@ -142,7 +142,7 @@ public class EnvVarsStaticSets {
                 } else {
                     StringBuilder sb = new StringBuilder(prefix.length() + value.length() + suffix.length());
                     sb.append(prefix);
-                    sb.append(toUpper ? value.toUpperCase() : value);
+                    sb.append(toUpper ? value.toUpperCase().replace("-", "_") : value);
                     sb.append(suffix);
                     replacement = sb.toString();
                 }
@@ -244,7 +244,7 @@ public class EnvVarsStaticSets {
                     values.set(i, newValue);
                 } else if (value.contains(uppercaseArgHolder)) {
                     foundOneOfThisArg = true;
-                    String newValue = value.replace(uppercaseArgHolder, arg.toUpperCase());
+                    String newValue = value.replace(uppercaseArgHolder, arg.toUpperCase().replace("-","_"));
                     values.set(i, newValue);
                 }
             }
