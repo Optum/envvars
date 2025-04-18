@@ -105,6 +105,11 @@ public class EnvVarsMapData implements TemplDataSource {
         putAllEnvVarsDefine(envVarsStaticSets.expandDefineSetReferences(single, "Declare Expansion"));
     }
 
+    public void putEnvVarDeclareSecrets(String key) throws EnvVarsException {
+        List<String> single = Collections.singletonList(key);
+        putAllEnvVarsDefineSecret(envVarsStaticSets.expandDefineSetReferences(single, "DeclareSecrets Expansion"));
+    }
+
     public void putEnvVarInject(String key, String from) {
         this.envVarsInjectSet.put(key, from);
     }

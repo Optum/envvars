@@ -203,6 +203,7 @@ public class EnvVarsMapDataEngine {
                 currentScope.containsKey("remap") ||
                 currentScope.containsKey("skipInjectIfNotDefined") ||
                 currentScope.containsKey("declare") ||
+                currentScope.containsKey("declareSecrets") ||
                 currentScope.containsKey("define") ||
                 currentScope.containsKey("defineSecrets")) {
             return true;
@@ -231,6 +232,8 @@ public class EnvVarsMapDataEngine {
         preEnvVarsData.putAll(processAllowMissing("skipInjectIfNotDefined", currentScope, node, selector));
 
         preEnvVarsData.putAll(processDeclareEnvvarsNode("declare", currentScope, node, selector));
+
+        preEnvVarsData.putAll(processDeclareSecretsEnvvarsNode("declareSecrets", currentScope, node, selector));
 
         preEnvVarsData.putAllEnvVarsDefine(processCurrentScopeMap("define", currentScope, node, selector));
 
@@ -359,12 +362,42 @@ public class EnvVarsMapDataEngine {
         return processDeclareEnvvars(messageContext, envvarsList);
     }
 
+    private EnvVarsMapData processDeclareSecretsEnvvarsNode(String listName, Map currentScope, EnvVarsRuntimeSelectors.Node node, String selector) throws EnvVarsException {
+        final String messageContext = "[" + node.context + ":" + selector + ":" + listName + "]";
+        Object envvarsObject = currentScope.get(listName);
+
+        if ("declareSecrets".equals(listName) && (envvarsObject!=null) && (!node.nodeSectionsPolicy.isDefineSecretsAllowed())) {
+            throw new EnvVarsException("The element " + messageContext + " is not allowed to contain a declare section.");
+        }
+
+        if (envvarsObject == null) {
+            envvarsObject = Collections.emptyList();
+        }
+
+        if (!(envvarsObject instanceof List)) {
+            throw new EnvVarsException("The element " + messageContext + " must be a list, but it is not.");
+        }
+
+        List<?> envvarsList = (List)envvarsObject;
+        return processDeclareSecretsEnvvars(messageContext, envvarsList);
+    }
+
     public EnvVarsMapData processDeclareEnvvars(String messageContext, List<?> envvarsList) throws EnvVarsException {
         EnvVarsMapData results = new EnvVarsMapData(envVarsStaticSets);
 
         for(Object entry : envvarsList) {
             String k = validateKeyCandidateObject(entry, messageContext);
             results.putEnvVarDeclare(k);
+        }
+        return results;
+    }
+
+    public EnvVarsMapData processDeclareSecretsEnvvars(String messageContext, List<?> envvarsList) throws EnvVarsException {
+        EnvVarsMapData results = new EnvVarsMapData(envVarsStaticSets);
+
+        for(Object entry : envvarsList) {
+            String k = validateKeyCandidateObject(entry, messageContext);
+            results.putEnvVarDeclareSecrets(k);
         }
         return results;
     }
