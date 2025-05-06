@@ -117,7 +117,7 @@ public class EnvVarsStaticSets {
         boolean foundOneOfThisArg = false;
 
         final String DELIMITERS = "[ ,.;:?&@#/()<>_\\-\\\\|]";
-        final Pattern PREFIX_PATTERN = Pattern.compile("(" + DELIMITERS + "*)(\\^?)");
+        final Pattern PREFIX_PATTERN = Pattern.compile("(" + DELIMITERS + "*)([\\^~]?)");
         final Pattern SUFFIX_PATTERN = Pattern.compile("(" + DELIMITERS + "*)");
         final String variable = "\\$" + argNumber;
         final Pattern TEMPLATE_PATTERN = Pattern.compile("\\{\\{" + PREFIX_PATTERN + "(" + variable + ")" + SUFFIX_PATTERN + "}}");
@@ -130,19 +130,26 @@ public class EnvVarsStaticSets {
             while (matcher.find()) {
                 foundOneOfThisArg = true;
                 String prefix = matcher.group(1);
-                String uppercase = matcher.group(2);
+                String caseShift = matcher.group(2);
                 // String templateVar = matcher.group(3);
                 String suffix = matcher.group(4);
                 int start = matcher.start();
                 int end = matcher.end();
-                boolean toUpper = "^".equals(uppercase);
+                boolean toUpper = "^".equals(caseShift);
+                boolean toLower = "~".equals(caseShift);
                 String replacement;
                 if (value.isEmpty()) {
                     replacement = "";
                 } else {
                     StringBuilder sb = new StringBuilder(prefix.length() + value.length() + suffix.length());
                     sb.append(prefix);
-                    sb.append(toUpper ? value.toUpperCase().replace("-", "_") : value);
+                    if (toUpper) {
+                        sb.append(value.toUpperCase().replace("-", "_"));
+                    } else if (toLower) {
+                        sb.append(value.toLowerCase().replace("_", "-"));
+                    } else {
+                        sb.append(value);
+                    }
                     sb.append(suffix);
                     replacement = sb.toString();
                 }
@@ -236,6 +243,7 @@ public class EnvVarsStaticSets {
             boolean foundOneOfThisArg = false;
             final String argHolder = "{{$" + (whichArg) + "}}";
             final String uppercaseArgHolder = "{{^$" + (whichArg) + "}}";
+            final String lowercaseArgHolder = "{{~$" + (whichArg) + "}}";
             for(int i=0; i<values.size(); i++) {
                 String value = values.get(i);
                 if (value.contains(argHolder)) {
@@ -245,6 +253,10 @@ public class EnvVarsStaticSets {
                 } else if (value.contains(uppercaseArgHolder)) {
                     foundOneOfThisArg = true;
                     String newValue = value.replace(uppercaseArgHolder, arg.toUpperCase().replace("-","_"));
+                    values.set(i, newValue);
+                } else if (value.contains(lowercaseArgHolder)) {
+                    foundOneOfThisArg = true;
+                    String newValue = value.replace(uppercaseArgHolder, arg.toLowerCase().replace("_","-"));
                     values.set(i, newValue);
                 }
             }
