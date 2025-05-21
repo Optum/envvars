@@ -90,16 +90,16 @@ class EnvVarEngineSpec extends Specification {
 
     def "Missing injectEnvvars reference in app1"() {
         when:
-        EnvVarsEngine envVars = new EnvVarsEngine()
+        EnvVarsEngine envVarsEngine = new EnvVarsEngine()
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "env1", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         final EnvVarsMapDataEngine badDataEnvProcessor = new EnvVarsMapDataEngine(badDataEnv)
-        envVars.add(badDataEnvProcessor.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
+        envVarsEngine.add(badDataEnvProcessor.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         EnvVarsRuntimeSelectors.Node node2 = new EnvVarsRuntimeSelectors.Node("applications", true, "app1", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         final EnvVarsMapDataEngine badDataAppProcessor = new EnvVarsMapDataEngine(badDataApp)
-        envVars.add(badDataAppProcessor.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
+        envVarsEngine.add(badDataAppProcessor.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
-        envVars.process()
+        envVarsEngine.generateResults()
 
         then:
         EnvVarsException ex = thrown()
@@ -108,16 +108,16 @@ class EnvVarEngineSpec extends Specification {
 
     def "Missing injectQualifiedEnvvars reference in app2"() {
         when:
-        EnvVarsEngine envVars = new EnvVarsEngine()
+        EnvVarsEngine envVarsEngine = new EnvVarsEngine()
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "env1", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         final EnvVarsMapDataEngine badDataEnvProcessor = new EnvVarsMapDataEngine(badDataEnv)
-        envVars.add(badDataEnvProcessor.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
+        envVarsEngine.add(badDataEnvProcessor.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         EnvVarsRuntimeSelectors.Node node2 = new EnvVarsRuntimeSelectors.Node("applications", true, "app2", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         final EnvVarsMapDataEngine badDataAppProcessor = new EnvVarsMapDataEngine(badDataApp)
-        envVars.add(badDataAppProcessor.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
+        envVarsEngine.add(badDataAppProcessor.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
-        envVars.process()
+        envVarsEngine.generateResults()
 
         then:
         EnvVarsException ex = thrown()
@@ -359,8 +359,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "optinunused", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.isEmpty()
@@ -372,8 +371,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "optinunused", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.isEmpty()
@@ -389,8 +387,7 @@ class EnvVarEngineSpec extends Specification {
         final EnvVarsMapDataEngine envVarsClientMap = new EnvVarsMapDataEngine(client)
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -407,8 +404,7 @@ class EnvVarEngineSpec extends Specification {
         final EnvVarsMapDataEngine envVarsClientMap = new EnvVarsMapDataEngine(client)
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -426,7 +422,7 @@ class EnvVarEngineSpec extends Specification {
         final EnvVarsMapDataEngine envVarsClientMap = new EnvVarsMapDataEngine(client)
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
-        envVarsEngine.process()
+        envVarsEngine.generateResults()
 
         then:
         EnvVarsException ex = thrown()
@@ -447,8 +443,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node2 = new EnvVarsRuntimeSelectors.Node("applications", true, "remappedunused", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -471,8 +466,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node2 = new EnvVarsRuntimeSelectors.Node("applications", true, "remappednonexistant", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -489,8 +483,7 @@ class EnvVarEngineSpec extends Specification {
         final EnvVarsMapDataEngine envVarsClientMap = new EnvVarsMapDataEngine(client)
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.isEmpty()
@@ -503,8 +496,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "hassecrets", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, ALLOWALL)
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -518,8 +510,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "qualified", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -532,8 +523,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "unqualified", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -546,8 +536,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "indirectqualified", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -560,8 +549,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "blankindirectqualified", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -574,8 +562,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "unqualifiedsecret", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, ALLOWALL)
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -589,8 +576,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "qualifiedsecret", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, ALLOWALL)
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -604,8 +590,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "indirectqualifiedsecret", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, ALLOWALL)
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -620,8 +605,7 @@ class EnvVarEngineSpec extends Specification {
         final EnvVarsMapDataEngine envVarsDefaultMap = new EnvVarsMapDataEngine(defaultdata)
         envVarsEngine.add(envVarsDefaultMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -636,8 +620,7 @@ class EnvVarEngineSpec extends Specification {
         final EnvVarsMapDataEngine envVarsDefault2Map = new EnvVarsMapDataEngine(defaultdata2)
         envVarsEngine.add(envVarsDefault2Map.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
-        envVarsEngine.process()
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -1066,8 +1049,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "tst", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, inlineSkipInject)
         envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
-        envVarsEngine.process();
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 1
@@ -1122,8 +1104,7 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "good", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, recursiveInject)
         envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
-        envVarsEngine.process();
-        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
 
         then:
         envvars.size() == 6
@@ -1142,7 +1123,8 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "bad", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, recursiveInject)
         envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
-        envVarsEngine.process();
+        envVarsEngine.generateResults()
+
         then:
         EnvVarsException ex = thrown()
         ex.message == 'Detected a recursive inject_set reference: "*BadDatabase<A>" beyond the recursive depth limit.  Recursion is only allow to depth 10.'
@@ -1172,7 +1154,8 @@ class EnvVarEngineSpec extends Specification {
         EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "dev", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
         final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, missingSet)
         envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
-        envVarsEngine.process();
+        envVarsEngine.generateResults()
+
         then:
         EnvVarsException ex = thrown()
         ex.message == 'Unable to find a define_set for key *NotThere'

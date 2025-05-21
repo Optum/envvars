@@ -19,7 +19,6 @@ import java.util.TreeMap;
 public class EnvVarsEngine {
     private final KeySourceOfTruth keySourceOfTruth;
     private final EnvVarsMapData envVarMapData;
-    private TreeMap<String, EnvVar> results;
     private final TemplEngine templEngine;
 
     public EnvVarsEngine() {
@@ -37,7 +36,6 @@ public class EnvVarsEngine {
     public EnvVarsEngine(KeySourceOfTruth keySourceOfTruth, EnvVarsStaticSets envVarsStaticSets) {
         this.keySourceOfTruth = keySourceOfTruth;
         this.envVarMapData = new EnvVarsMapData(envVarsStaticSets);
-        this.results = null;
         this.templEngine = new TemplEngine(envVarMapData);
     }
 
@@ -111,8 +109,8 @@ public class EnvVarsEngine {
         return null;
     }
 
-    public void process() throws EnvVarsException {
-        results = new TreeMap<>();
+    public TreeMap<String, EnvVar> generateResults() throws EnvVarsException {
+        final TreeMap<String, EnvVar> results = new TreeMap<>();
 
         // Local copy of remaps.
         Map<String, String> remainingRemaps = new HashMap<>();
@@ -132,6 +130,7 @@ public class EnvVarsEngine {
         if (!remainingRemaps.isEmpty()) {
             throw new EnvVarsException("The following variables were listed in remap blocks but never injected: " + remainingRemaps.keySet());
         }
+        return results;
     }
 
     /**
@@ -198,25 +197,6 @@ public class EnvVarsEngine {
             return null;
         }
         throw new EnvVarsException("Unable to find " + effectiveReference);
-    }
-
-    public void add(String key, String value) throws EnvVarsException {
-        add(new SimpleEnvVar(key, value));
-    }
-
-    public TreeMap<String, EnvVar> getResults() throws EnvVarsException {
-        validateState();
-        return results;
-    }
-
-    private void add(EnvVar envVar) throws EnvVarsException {
-        results.put(envVar.getKey(), envVar);
-    }
-
-    private void validateState() throws EnvVarsException {
-        if (results == null) {
-            throw new EnvVarsException("Method not supported before process method is invoked.");
-        }
     }
 
 }

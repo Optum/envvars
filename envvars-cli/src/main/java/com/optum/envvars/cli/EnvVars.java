@@ -31,8 +31,7 @@ public class EnvVars {
                 }
                 envVarEngine.add(new ScriptableEnvVarMapDataSource(values, args[i], envVarsMapDataReader));
             }
-            envVarEngine.process();
-            TreeMap<String, EnvVar> envvars = envVarEngine.getResults();
+            TreeMap<String, EnvVar> envvars = envVarEngine.generateResults();
             for(EnvVar envvar : envvars.values()) {
                 StringBuilder sb =  new StringBuilder();
                 sb.append(envvar.getKey());
