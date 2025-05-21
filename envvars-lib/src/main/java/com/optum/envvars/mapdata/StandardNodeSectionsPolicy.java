@@ -17,7 +17,7 @@ public enum StandardNodeSectionsPolicy implements NodeSectionsPolicy {
     private final boolean remapAllowed;
     private final boolean skipInjectIfNotDefinedAllowed;
     private final boolean defineSecretsAllowed;
-    private final boolean defineConfigMapsAllowed;
+    private final boolean defineReferencesAllowed;
 
     StandardNodeSectionsPolicy(
             boolean declareAllowed,
@@ -26,14 +26,14 @@ public enum StandardNodeSectionsPolicy implements NodeSectionsPolicy {
             boolean remapAllowed,
             boolean skipInjectIfNotDefinedAllowed,
             boolean defineSecretsAllowed,
-            boolean defineConfigMapsAllowed) {
+            boolean defineReferencesAllowed) {
         this.declareAllowed = declareAllowed;
         this.defineAllowed = defineAllowed;
         this.injectAllowed = injectAllowed;
         this.remapAllowed = remapAllowed;
         this.skipInjectIfNotDefinedAllowed = skipInjectIfNotDefinedAllowed;
         this.defineSecretsAllowed = defineSecretsAllowed;
-        this.defineConfigMapsAllowed = defineConfigMapsAllowed;
+        this.defineReferencesAllowed = defineReferencesAllowed;
     }
 
     public boolean isDeclareAllowed() {
@@ -60,8 +60,8 @@ public enum StandardNodeSectionsPolicy implements NodeSectionsPolicy {
         return defineSecretsAllowed;
     }
 
-    public boolean isDefineConfigMapsAllowed() {
-        return defineConfigMapsAllowed;
+    public boolean isDefineReferencesAllowed() {
+        return defineReferencesAllowed;
     };
 
 }

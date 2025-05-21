@@ -1,6 +1,6 @@
 package com.optum.envvars;
 
-import com.optum.envvars.impl.ConfigMapEnvVar;
+import com.optum.envvars.impl.ReferenceEnvVar;
 import com.optum.envvars.impl.SecretEnvVar;
 import com.optum.envvars.impl.SimpleEnvVar;
 import com.optum.envvars.key.KeySourceOfTruth;
@@ -13,48 +13,13 @@ import com.optum.templ.exceptions.TemplException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import java.util.TreeMap;
 
-/**
- * This is a Builder Class to control how Environment Variables are gathered
- * from various sources and ultimately converted into the JSON format to be injected into the Deployment Configuration
- * of a cloud provider.
- * <p>
- * There is a conceptual state machine for the overall usage flow for EnvVars.
- * <p>
- * This is the timeline:
- * 1) "Pre" phase
- * 2) Invoking a "Convert" method
- * 3) Normal phase
- * <p>
- * The "Pre" phase is when EnvVars is gathering a working map.
- * The "Convert" phase is when the working map is converted into the final format.  This can be done automatically, or
- * manually (when data conversion of the working map is desired).
- * The Normal phase builds the actual EnvVar set.  The EnvVar set is meant to be immutable and write-only (not readable).
- * It is not write-once (you can change values) but you can't inspect the Normal phase EnvVar set.  This is intentional
- * to prevent circular references (for one thing) and generally prevent misuse of the EnvVar set.
- * <p>
- * NOTE:
- * * It is currently possible to call preAdd after the Convert phase, but those changes do not automatically flow
- * into the ultimate output.
- * * The Convert methods are idempotent, resetting the final data set.
- * <p>
- * Typical Use Cases
- * <p>
- * Pre phase is when static-sourced constants are loaded, typically from files.  These are layered, with later additions
- * overwriting earlier values when keys are the same.
- * <p>
- * The Normal phase is where dynamically-derived environment variables are added.  These can be dynamic based on
- * fields from Environment, Component or CloudProvider, as well as based on static-source constants loaded in the
- * Pre phase by using the preGet() method to directly inspect the Pre Map.
- */
 public class EnvVarsEngine {
     private final KeySourceOfTruth keySourceOfTruth;
     private final EnvVarsMapData envVarMapData;
-    private TreeSet<EnvVar> results;
+    private TreeMap<String, EnvVar> results;
     private final TemplEngine templEngine;
 
     public EnvVarsEngine() {
@@ -84,11 +49,6 @@ public class EnvVarsEngine {
     public void add(EnvVarsMapData envVarMapData) throws EnvVarsException {
         this.envVarMapData.putAll(envVarMapData);
         throwExceptionIfForeignKeysNotDefined();
-    }
-
-    public void process() throws EnvVarsException {
-        initNormalPhase();
-        resolveInjectAndRemap();
     }
 
     public Set<String> getForeignKeysFor(String context, boolean required) throws EnvVarsException {
@@ -151,16 +111,9 @@ public class EnvVarsEngine {
         return null;
     }
 
-    private void initNormalPhase() {
-        results = new TreeSet<>();
-    }
+    public void process() throws EnvVarsException {
+        results = new TreeMap<>();
 
-    /**
-     * This method is the first part of the Convert process.  It iterates over all the Refs and add the corresponding
-     * Defs to the final map set.
-     * Exception is thrown if a Ref cannot find its matching Def.
-     */
-    private void resolveInjectAndRemap() throws EnvVarsException {
         // Local copy of remaps.
         Map<String, String> remainingRemaps = new HashMap<>();
         remainingRemaps.putAll(envVarMapData.getEnvVarsRemapSet());
@@ -172,7 +125,7 @@ public class EnvVarsEngine {
             final String remapQualifier = remainingRemaps.remove(key);
             EnvVar envVar = resolveFromQualifier(key, qualifier, remapQualifier);
             if (envVar!=null) {
-                add(envVar);
+                results.put(envVar.getKey(), envVar);
             }
         }
 
@@ -224,16 +177,16 @@ public class EnvVarsEngine {
                 return new SecretEnvVar(reference, val);
             }
 
-            String configMapValue;
+            String referenceValue;
             if (qualifierToUse != null) {
                 effectiveReference = reference + " from " + qualifierToUse;
-                configMapValue = envVarMapData.getEnvVarsDefineConfigMapSet().get(qualifierToUse);
+                referenceValue = envVarMapData.getEnvVarsDefineReferenceSet().get(qualifierToUse);
             } else {
-                configMapValue = envVarMapData.getEnvVarsDefineConfigMapSet().get(reference);
+                referenceValue = envVarMapData.getEnvVarsDefineReferenceSet().get(reference);
             }
-            if (configMapValue != null) {
-                final String val = templEngine.processTemplate(configMapValue);
-                return new ConfigMapEnvVar(reference, val);
+            if (referenceValue != null) {
+                final String val = templEngine.processTemplate(referenceValue);
+                return new ReferenceEnvVar(reference, val);
             }
         } catch (MissingKeyTemplException e) {
             throw new EnvVarsException("Value is missing for template: {{" + e.getKey() + "}}.  If you want it to be optional, an empty value is needed instead of a missing value.");
@@ -251,42 +204,18 @@ public class EnvVarsEngine {
         add(new SimpleEnvVar(key, value));
     }
 
-    public TreeSet<EnvVar> getResults() throws EnvVarsException {
+    public TreeMap<String, EnvVar> getResults() throws EnvVarsException {
         validateState();
         return results;
     }
 
-    public String toJSON() throws EnvVarsException {
-        validateState();
-        return results.stream()
-                .map(EnvVar::asJSON)
-                .collect(Collectors.joining(",\n"));
-    }
-
-    public String toConfigMap() throws EnvVarsException {
-        validateState();
-        return results.stream()
-                .map(EnvVar::asConfigMap)
-                .filter(Objects::nonNull)
-                .sorted()
-                .collect(Collectors.joining("\n"));
-    }
-
     private void add(EnvVar envVar) throws EnvVarsException {
-        validateState();
-        validateContents(envVar);
-        results.add(envVar);
+        results.put(envVar.getKey(), envVar);
     }
 
     private void validateState() throws EnvVarsException {
         if (results == null) {
             throw new EnvVarsException("Method not supported before process method is invoked.");
-        }
-    }
-
-    private void validateContents(EnvVar envVar) throws EnvVarsException {
-        if (results.contains(envVar)) {
-            throw new EnvVarsException("EnvVar " + envVar.getKey() + " already exists.  Updating is only allowed in Pre phase.");
         }
     }
 

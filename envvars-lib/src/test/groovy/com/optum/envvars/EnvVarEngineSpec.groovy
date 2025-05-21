@@ -1,5 +1,6 @@
 package com.optum.envvars
 
+import com.optum.envvars.impl.SecretEnvVar
 import com.optum.envvars.key.KeySourceOfTruth
 import com.optum.envvars.key.MapKeySourceOfTruth
 import com.optum.envvars.mapdata.EnvVarsMapData
@@ -359,9 +360,10 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == ""
+        envvars.isEmpty()
     }
 
     def "Unreferenced define are not injected."() {
@@ -371,9 +373,10 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == ""
+        envvars.isEmpty()
     }
 
     def "Referenced define are injected."() {
@@ -387,9 +390,11 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "dinner", "value" : "pizza" }"""
+        envvars.size() == 1
+        envvars.get("dinner").getValue() == "pizza"
     }
 
     def "Remap gives right value."() {
@@ -403,9 +408,11 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "food", "value" : "waffles" }"""
+        envvars.size() == 1
+        envvars.get("food").getValue() == "waffles"
     }
 
     def "Remap does not inject"() {
@@ -441,9 +448,11 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "food", "value" : "sandwich" }"""
+        envvars.size() == 1
+        envvars.get("food").getValue() == "sandwich"
     }
 
     // There is no define for meal - this is normally an error.  But we only use meal FROM something else.  So it is fine.
@@ -463,9 +472,11 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "meal", "value" : "waffles" }"""
+        envvars.size() == 1
+        envvars.get("meal").getValue() == "waffles"
     }
 
     def "Duplicate unreferenced define is allowed."() {
@@ -479,9 +490,10 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsClientMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node2))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == ""
+        envvars.isEmpty()
     }
 
 
@@ -492,9 +504,12 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "credentials", "valueFrom" : { "secretKeyRef" : { "name" : "secretdata", "key"  : "alpha--secret handshake"}}}"""
+        envvars.size() == 1
+        envvars.get("credentials") instanceof SecretEnvVar
+        envvars.get("credentials").getValue() == "alpha--secret handshake"
     }
 
     def "Qualified resolves."() {
@@ -504,9 +519,11 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "URL", "value" : "https://" }"""
+        envvars.size() == 1
+        envvars.get("URL").getValue() == "https://"
     }
 
     def "Unqualified resolves."() {
@@ -516,9 +533,11 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "hobby", "value" : "knitting" }"""
+        envvars.size() == 1
+        envvars.get("hobby").getValue() == "knitting"
     }
 
     def "Indirect qualified resolves."() {
@@ -528,9 +547,11 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "URL", "value" : "http://" }"""
+        envvars.size() == 1
+        envvars.get("URL").getValue() == "http://"
     }
 
     def "Blank indirect qualified resolves."() {
@@ -540,9 +561,11 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "URL", "value" : "https://" }"""
+        envvars.size() == 1
+        envvars.get("URL").getValue() == "https://"
     }
 
     def "Unqualified secret resolves."() {
@@ -552,9 +575,12 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "hideout", "valueFrom" : { "secretKeyRef" : { "name" : "secretdata", "key"  : "alpha--batcave"}}}"""
+        envvars.size() == 1
+        envvars.get("hideout") instanceof SecretEnvVar
+        envvars.get("hideout").getValue() == "alpha--batcave"
     }
 
     def "Qualified secret resolves."() {
@@ -564,9 +590,12 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "identity", "valueFrom" : { "secretKeyRef" : { "name" : "secretdata", "key"  : "alpha--bruce"}}}"""
+        envvars.size() == 1
+        envvars.get("identity") instanceof SecretEnvVar
+        envvars.get("identity").getValue() == "alpha--bruce"
     }
 
     def "Indirect qualified secret resolves."() {
@@ -576,9 +605,12 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "identity", "valueFrom" : { "secretKeyRef" : { "name" : "secretdata", "key"  : "alpha--bruce"}}}"""
+        envvars.size() == 1
+        envvars.get("identity") instanceof SecretEnvVar
+        envvars.get("identity").getValue() == "alpha--bruce"
     }
 
     def "Default processing works."() {
@@ -589,9 +621,12 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsDefaultMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "identity", "valueFrom" : { "secretKeyRef" : { "name" : "secretdata", "key"  : "alpha--clark"}}}"""
+        envvars.size() == 1
+        envvars.get("identity") instanceof SecretEnvVar
+        envvars.get("identity").getValue() == "alpha--clark"
     }
 
     def "Default processing works 2."() {
@@ -602,22 +637,12 @@ class EnvVarEngineSpec extends Specification {
         envVarsEngine.add(envVarsDefault2Map.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
 
         envVarsEngine.process()
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
 
         then:
-        envVarsEngine.toJSON() == """{ "name" : "sport", "valueFrom" : { "secretKeyRef" : { "name" : "secretdata", "key"  : "alpha--baseball"}}}"""
-    }
-
-    def "Double quotes are correctly escaped."() {
-        when:
-        EnvVarsEngine envVarsEngine = new EnvVarsEngine()
-        EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("dataset", true, "sample", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
-        final EnvVarsMapDataEngine envVarsDoubleQuotesMap = new EnvVarsMapDataEngine(doubleQuotes)
-        envVarsEngine.add(envVarsDoubleQuotesMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
-
-        envVarsEngine.process()
-
-        then:
-        envVarsEngine.toJSON() == """{ "name" : "routes", "value" : "[\\"GET /\\", \\"GET /routes\\"]" }"""
+        envvars.size() == 1
+        envvars.get("sport") instanceof SecretEnvVar
+        envvars.get("sport").getValue() == "alpha--baseball"
     }
 
     final Map envKeys = new JsonSlurper().parseText(
@@ -1042,8 +1067,11 @@ class EnvVarEngineSpec extends Specification {
         final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, inlineSkipInject)
         envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
         envVarsEngine.process();
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+
         then:
-        envVarsEngine.toJSON() == """{ "name" : "OTHER", "value" : "value" }"""
+        envvars.size() == 1
+        envvars.get("OTHER").getValue() == "value"
     }
 
     final Map recursiveInject = new JsonSlurper().parseText(
@@ -1095,13 +1123,16 @@ class EnvVarEngineSpec extends Specification {
         final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, recursiveInject)
         envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
         envVarsEngine.process();
+        TreeMap<String, EnvVar> envvars = envVarsEngine.getResults()
+
         then:
-        envVarsEngine.toJSON() == """{ "name" : "CONNECTION_URL_A", "value" : "http://a" },
-{ "name" : "CONNECTION_URL_B", "value" : "http://b" },
-{ "name" : "CONNECTION_URL_C", "value" : "http://c" },
-{ "name" : "USERNAME_A", "value" : "asdf" },
-{ "name" : "USERNAME_B", "value" : "sdfg" },
-{ "name" : "USERNAME_C", "value" : "dfgh" }"""
+        envvars.size() == 6
+        envvars.get("CONNECTION_URL_A").getValue() == "http://a"
+        envvars.get("CONNECTION_URL_B").getValue() == "http://b"
+        envvars.get("CONNECTION_URL_C").getValue() == "http://c"
+        envvars.get("USERNAME_A").getValue() == "asdf"
+        envvars.get("USERNAME_B").getValue() == "sdfg"
+        envvars.get("USERNAME_C").getValue() == "dfgh"
     }
 
     def "Infinitly Recursive Injects"() {

@@ -7,5 +7,5 @@ public interface NodeSectionsPolicy {
     boolean isRemapAllowed();
     boolean isSkipInjectIfNotDefinedAllowed();
     boolean isDefineSecretsAllowed();
-    boolean isDefineConfigMapsAllowed();
+    boolean isDefineReferencesAllowed();
 }

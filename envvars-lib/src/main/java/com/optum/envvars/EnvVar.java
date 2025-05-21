@@ -6,6 +6,6 @@ package com.optum.envvars;
 public interface EnvVar {
     String getKey();
     String getValue();
-    String asJSON();
-    String asConfigMap();
+    boolean isSecret();
+    boolean isReference();
 }

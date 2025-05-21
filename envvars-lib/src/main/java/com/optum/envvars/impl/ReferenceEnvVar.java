@@ -2,9 +2,9 @@ package com.optum.envvars.impl;
 
 import com.optum.envvars.EnvVarsException;
 
-public class SimpleEnvVar extends AbstractEnvVar {
+public class ReferenceEnvVar extends AbstractEnvVar {
 
-    public SimpleEnvVar(String key, String value) throws EnvVarsException {
+    public ReferenceEnvVar(String key, String value) throws EnvVarsException {
         super(key, value);
     }
 
@@ -15,6 +15,6 @@ public class SimpleEnvVar extends AbstractEnvVar {
 
     @Override
     public boolean isReference() {
-        return false;
+        return true;
     }
 }

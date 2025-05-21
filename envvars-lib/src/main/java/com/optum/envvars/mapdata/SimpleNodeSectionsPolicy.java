@@ -7,16 +7,16 @@ public class SimpleNodeSectionsPolicy implements NodeSectionsPolicy {
     private final boolean remapAllowed;
     private final boolean skipInjectIfNotDefinedAllowed;
     private final boolean defineSecretsAllowed;
-    private final boolean defineConfigMapsAllowed;
+    private final boolean defineReferencesAllowed;
 
-    public SimpleNodeSectionsPolicy(boolean declareAllowed, boolean defineAllowed, boolean injectAllowed, boolean remapAllowed, boolean skipInjectIfNotDefinedAllowed, boolean defineSecretsAllowed, boolean defineConfigMapsAllowed) {
+    public SimpleNodeSectionsPolicy(boolean declareAllowed, boolean defineAllowed, boolean injectAllowed, boolean remapAllowed, boolean skipInjectIfNotDefinedAllowed, boolean defineSecretsAllowed, boolean defineReferencesAllowed) {
         this.declareAllowed = declareAllowed;
         this.defineAllowed = defineAllowed;
         this.injectAllowed = injectAllowed;
         this.remapAllowed = remapAllowed;
         this.skipInjectIfNotDefinedAllowed = skipInjectIfNotDefinedAllowed;
         this.defineSecretsAllowed = defineSecretsAllowed;
-        this.defineConfigMapsAllowed = defineConfigMapsAllowed;
+        this.defineReferencesAllowed = defineReferencesAllowed;
     }
 
     public boolean isDeclareAllowed() {
@@ -44,8 +44,8 @@ public class SimpleNodeSectionsPolicy implements NodeSectionsPolicy {
         return defineSecretsAllowed;
     }
 
-    public boolean isDefineConfigMapsAllowed() {
-        return defineConfigMapsAllowed;
+    public boolean isDefineReferencesAllowed() {
+        return defineReferencesAllowed;
     };
 
 }

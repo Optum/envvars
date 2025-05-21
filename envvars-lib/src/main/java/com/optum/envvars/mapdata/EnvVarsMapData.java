@@ -22,7 +22,7 @@ public class EnvVarsMapData implements TemplDataSource {
     private final Map<String, String> envVarsInjectSet;
     private final Map<String, String> envVarsRemapSet;
     private final Map<String, String> envVarsDefineSecretSet;
-    private final Map<String, String> envVarsDefineConfigMapSet;
+    private final Map<String, String> envVarsDefineReferenceSet;
     private final Map<String, String> skipInjectIfNotDefined;
     private final EnvVarsStaticSets envVarsStaticSets;
 
@@ -36,7 +36,7 @@ public class EnvVarsMapData implements TemplDataSource {
         this.envVarsInjectSet = new HashMap<>();
         this.envVarsRemapSet = new HashMap<>();
         this.envVarsDefineSecretSet = new HashMap<>();
-        this.envVarsDefineConfigMapSet = new HashMap<>();
+        this.envVarsDefineReferenceSet = new HashMap<>();
         this.skipInjectIfNotDefined = new HashMap<>();
         if (envVarsStaticSets!=null) {
             this.envVarsStaticSets = envVarsStaticSets;
@@ -55,7 +55,7 @@ public class EnvVarsMapData implements TemplDataSource {
         putAllEnvVarsInject(envVarsMapData.envVarsInjectSet);
         putAllEnvVarsRemap(envVarsMapData.envVarsRemapSet);
         putAllEnvVarsDefineSecret(envVarsMapData.envVarsDefineSecretSet);
-        putAllEnvVarsDefineConfigMap(envVarsMapData.envVarsDefineConfigMapSet);
+        putAllEnvVarsDefineReference(envVarsMapData.envVarsDefineReferenceSet);
         putAllSkipInjectIfNotDefined(envVarsMapData.skipInjectIfNotDefined);
     }
 
@@ -87,8 +87,8 @@ public class EnvVarsMapData implements TemplDataSource {
         this.envVarsDefineSecretSet.putAll(envVarsDefineSecretSet);
     }
 
-    public void putAllEnvVarsDefineConfigMap(Map<String, String> envVarsDefineConfigMapSet) {
-        this.envVarsDefineConfigMapSet.putAll(envVarsDefineConfigMapSet);
+    public void putAllEnvVarsDefineReference(Map<String, String> envVarsDefineReferenceSet) {
+        this.envVarsDefineReferenceSet.putAll(envVarsDefineReferenceSet);
     }
 
     public void putAllSkipInjectIfNotDefined(Map<String, String> skipInjectIfNotDefined) {
@@ -163,8 +163,8 @@ public class EnvVarsMapData implements TemplDataSource {
         return envVarsDefineSecretSet;
     }
 
-    public Map<String, String> getEnvVarsDefineConfigMapSet() {
-        return envVarsDefineConfigMapSet;
+    public Map<String, String> getEnvVarsDefineReferenceSet() {
+        return envVarsDefineReferenceSet;
     }
 
     public boolean isSkipInjectIfNotDefined(String key) {

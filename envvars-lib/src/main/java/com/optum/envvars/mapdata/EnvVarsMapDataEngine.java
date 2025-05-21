@@ -239,7 +239,7 @@ public class EnvVarsMapDataEngine {
 
         preEnvVarsData.putAllEnvVarsDefineSecret(processCurrentScopeMap("defineSecrets", currentScope, node, selector));
 
-        preEnvVarsData.putAllEnvVarsDefineConfigMap(processCurrentScopeMap("defineConfigMaps", currentScope, node, selector));
+        preEnvVarsData.putAllEnvVarsDefineReference(processCurrentScopeMap("defineReferences", currentScope, node, selector));
     }
 
     /**
