@@ -470,12 +470,12 @@ Consumers should not be directly aware whether a variable is protected or not.  
 
 > But your CICD code that uses the **envvars** library will need to specially map the secret data as part of its output generation.
 
-## Define ConfigMaps
+## Define References
 > Work in Progress
 
 Secrets are private variables having values that are expected to actually be indirect references to protected data stored somewhere else.
 
-ConfigMaps are public variables having values that are expected to actually be indirect references to public data stores somewhere else.
+References are public variables having values that are expected to actually be indirect references to public data stores somewhere else.
 
 ## Allowing Missing Declarations
 Is a missing declaration a defect?  Opinions vary.  The **envvars* library lets you choose your own side on the "missing means error" vs "missing means default" argument.
@@ -634,7 +634,7 @@ The constrained features for each node are:
 * Remap
 * SkipInjectIfNotDefined
 * DefineSecrets
-* DefineConfigMaps
+* DefineReferences
 
 
 ## Schema Variable Constraints

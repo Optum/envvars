@@ -8,12 +8,13 @@ public class SecretEnvVar extends AbstractEnvVar {
         super(key, value);
     }
 
-    public String asJSON() {
-        return "{ \"name\" : \"" + key + "\", \"valueFrom\" : { \"secretKeyRef\" : { \"name\" : \"secretdata\", \"key\"  : \"" + getValueAsJSON() + "\"}}}";
+    @Override
+    public boolean isSecret() {
+        return true;
     }
 
     @Override
-    public String asConfigMap() {
-        return null;
+    public boolean isReference() {
+        return false;
     }
 }

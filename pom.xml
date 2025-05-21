@@ -6,7 +6,7 @@
 
     <groupId>com.optum.envvars</groupId>
     <artifactId>envvars</artifactId>
-    <version>2.3.X-SNAPSHOT</version>
+    <version>3.0.X-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>envvars</name>
