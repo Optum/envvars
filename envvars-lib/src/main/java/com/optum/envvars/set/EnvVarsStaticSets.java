@@ -241,27 +241,13 @@ public class EnvVarsStaticSets {
         for(String rawarg : args) {
             String arg = rawarg.trim();
             boolean foundOneOfThisArg = false;
-            final String argHolder = "{{$" + (whichArg) + "}}";
-            final String uppercaseArgHolder = "{{^$" + (whichArg) + "}}";
-            final String lowercaseArgHolder = "{{~$" + (whichArg) + "}}";
-            for(int i=0; i<values.size(); i++) {
-                String value = values.get(i);
-                if (value.contains(argHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = value.replace(argHolder, arg);
-                    values.set(i, newValue);
-                } else if (value.contains(uppercaseArgHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = value.replace(uppercaseArgHolder, arg.toUpperCase().replace("-","_"));
-                    values.set(i, newValue);
-                } else if (value.contains(lowercaseArgHolder)) {
-                    foundOneOfThisArg = true;
-                    String newValue = value.replace(uppercaseArgHolder, arg.toLowerCase().replace("_","-"));
-                    values.set(i, newValue);
-                }
+
+            if (argSwap(whichArg, arg, values)) {
+                foundOneOfThisArg = true;
             }
+
             if (!foundOneOfThisArg) {
-                throw new EnvVarsException("Parameterized Inject Set \"" + key + "\" was invoked with argument list \"" + Arrays.asList(args) + "\" but the definition does not contain a use of \"" + argHolder + "\".  Set values are: " + values);
+                throw new EnvVarsException("Parameterized Inject Set \"" + key + "\" was invoked with argument list \"" + Arrays.asList(args) + "\" but the definition does not contain a use of \"$" + whichArg + "\".  Set values are: " + values);
             }
             whichArg++;
         }

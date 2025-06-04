@@ -1016,6 +1016,75 @@ class EnvVarEngineSpec extends Specification {
         ex.message == 'Parameterized Inject Set "Set" was invoked with argument list "[ x ,   ,  ]" but the definition does not contain a use of "$3".  Set values are: {KEY{{$1}}=VALUE{{$2}}}'
     }
 
+    final Map injectWithPrefixSuffix = new JsonSlurper().parseText(
+            """{
+"environments": {
+    "default": {
+        "inject": [
+            "*Database< A >"
+        ]
+    },
+    "dev": {
+        "define": {
+            "DATABASEURL" : "blank",
+            "DATABASE_A-URL" : "db a",
+            "DATABASE_B-URL" : "db b"
+        }
+    }
+}
+}"""
+    ) as Map
+
+    final Map injectWithPrefixSuffixSet = ["Database": ['DATABASE{{_$1-}}URL']]
+
+    def "Inline Normal Injects"() {
+        when:
+        EnvVarsStaticSets envVarsStaticSets = new EnvVarsStaticSets(injectWithPrefixSuffixSet, Collections.emptyMap())
+        EnvVarsEngine envVarsEngine = new EnvVarsEngine(envVarsStaticSets)
+        EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "dev", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
+        final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, injectWithPrefixSuffix)
+        envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
+
+        then:
+        envvars.size() == 1
+        envvars.get("DATABASE_A-URL").getValue() == "db a"
+    }
+
+    final Map injectWithPrefixSuffixBlank = new JsonSlurper().parseText(
+            """{
+"environments": {
+    "default": {
+        "inject": [
+            "*Database< >"
+        ]
+    },
+    "dev": {
+        "define": {
+            "DATABASE" : "blank",
+            "DATABASE_A-URL" : "db a",
+            "DATABASE_B-URL" : "db b"
+        }
+    }
+}
+}"""
+    ) as Map
+
+    final Map injectWithPrefixSuffixBlankSet = ["Database": ['DATABASE{{_$1-}}']]
+
+    def "Inline Blank Injects"() {
+        when:
+        EnvVarsStaticSets envVarsStaticSets = new EnvVarsStaticSets(injectWithPrefixSuffixBlankSet, Collections.emptyMap())
+        EnvVarsEngine envVarsEngine = new EnvVarsEngine(envVarsStaticSets)
+        EnvVarsRuntimeSelectors.Node node = new EnvVarsRuntimeSelectors.Node("environments", true, "dev", true, EnvVarsMapDataEngine.DefaultProcessingPolicy.SUPPORTED, StandardNodeSectionsPolicy.NOSECRETS)
+        final EnvVarsMapDataEngine nestedMap = new EnvVarsMapDataEngine(null, envVarsStaticSets, injectWithPrefixSuffixBlank)
+        envVarsEngine.add(nestedMap.get(new EnvVarsRuntimeSelectors(Collections.singletonList(node))))
+        TreeMap<String, EnvVar> envvars = envVarsEngine.generateResults()
+
+        then:
+        envvars.size() == 1
+        envvars.get("DATABASE").getValue() == "blank"
+    }
 
     final Map inlineSkipInject = new JsonSlurper().parseText(
             """{
