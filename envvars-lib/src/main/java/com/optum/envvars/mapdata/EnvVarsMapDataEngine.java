@@ -169,15 +169,13 @@ public class EnvVarsMapDataEngine {
      * @return The scope of the selector, if found, otherwise null.
      */
     Map addEnvVarsForSelectorImpl(Map previousScope, EnvVarsMapData envVarsData, EnvVarsRuntimeSelectors.Node node, String selector, boolean required) throws EnvVarsException {
-        final String messageContext = "[" + node.context + ":" + selector + "]";
-
         /////////////////////////////////////
         // We start by looking for a SELECTOR
         /////////////////////////////////////
         Object currentScopeObject = previousScope.get(selector);
         if ((currentScopeObject == null)) {
             if (required) {
-                throw new EnvVarsException("Unable to find " + messageContext + " which is required.");
+                throw new EnvVarsException("Missing selector \"" + selector + "\".  Unable to find an element named \"" + selector + "\" inside the node \"" + node.context + "\", and rules for this node require that it exists.");
             } else {
                 // Selector not found.  Selector not required.  Do nothing, and be happy about it.
                 return null;
@@ -185,7 +183,7 @@ public class EnvVarsMapDataEngine {
         }
 
         if (!(currentScopeObject instanceof Map)) {
-            throw new EnvVarsException("The element " + messageContext + " must be a map, but it is not.");
+            throw new EnvVarsException("Invalid selector \"" + selector + "\".  The element \"" + selector + "\" inside the node \"" + node.context + "\" must be a map, but it is not.");
         }
 
         Map currentScope = (Map)currentScopeObject;
@@ -266,7 +264,7 @@ public class EnvVarsMapDataEngine {
         }
 
         if (!(envvarsObject instanceof Map)) {
-            throw new EnvVarsException("The element " + messageContext + " must be a map, but it is not.");
+            throw new EnvVarsException("Invalid context \"" + mapName + "\".  The element \"" + mapName + "\" inside the selector \"" + selector + "\" inside the node \"" + node.context + "\" must be a map, but it is not.");
         }
 
         Map<String, String> results = new HashMap<>();

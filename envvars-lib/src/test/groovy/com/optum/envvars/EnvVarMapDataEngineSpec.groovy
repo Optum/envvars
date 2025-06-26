@@ -65,7 +65,7 @@ class EnvVarMapDataEngineSpec extends Specification {
 
         then:
         EnvVarsException ex = thrown()
-        ex.message == 'Unable to find [environments:missing] which is required.'
+        ex.message == 'Missing selector "missing".  Unable to find an element named "missing" inside the node "environments", and rules for this node require that it exists.'
     }
 
     def "SELECTOR: Missing optional selector" () {
@@ -108,7 +108,7 @@ class EnvVarMapDataEngineSpec extends Specification {
 
         then:
         EnvVarsException ex = thrown()
-        ex.message == 'The element [environments:env1:define] must be a map, but it is not.'
+        ex.message == 'Invalid context "define".  The element "define" inside the selector "env1" inside the node "environments" must be a map, but it is not.'
     }
 
     def "BLOCK: Bad secretEnvvars" () {
@@ -119,7 +119,7 @@ class EnvVarMapDataEngineSpec extends Specification {
 
         then:
         EnvVarsException ex = thrown()
-        ex.message == 'The element [environments:env2:defineSecrets] must be a map, but it is not.'
+        ex.message == 'Invalid context "defineSecrets".  The element "defineSecrets" inside the selector "env2" inside the node "environments" must be a map, but it is not.'
     }
 
     def "BLOCK: Bad injectEnvvars" () {
@@ -152,7 +152,7 @@ class EnvVarMapDataEngineSpec extends Specification {
 
         then:
         EnvVarsException ex = thrown()
-        ex.message == 'The element [environments:badenv] must be a map, but it is not.'
+        ex.message == 'Invalid selector "badenv".  The element "badenv" inside the node "environments" must be a map, but it is not.'
     }
     /**
      * Three different flows, so each test in each of these blocks: envvars, injectedEnvvars, injectedQualifiedEnvvars.
@@ -465,7 +465,7 @@ class EnvVarMapDataEngineSpec extends Specification {
 
         then:
         EnvVarsException ex = thrown()
-        ex.message == 'Unable to find [applications:default] which is required.'
+        ex.message == 'Missing selector "default".  Unable to find an element named "default" inside the node "applications", and rules for this node require that it exists.'
     }
 
     final Map envKeys = new JsonSlurper().parseText("""{
