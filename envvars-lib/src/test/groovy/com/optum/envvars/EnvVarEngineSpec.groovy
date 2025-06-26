@@ -75,7 +75,7 @@ class EnvVarEngineSpec extends Specification {
 
         then:
         EnvVarsException ex = thrown()
-        ex.message == 'Unable to find [environments:missing] which is required.'
+        ex.message == 'Missing selector "missing".  Unable to find an element named "missing" inside the node "environments", and rules for this node require that it exists.'
     }
 
     def "SELECTOR: Missing optional selector"() {
