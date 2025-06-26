@@ -144,7 +144,7 @@ public class EnvVarsStaticSets {
                     StringBuilder sb = new StringBuilder(prefix.length() + value.length() + suffix.length());
                     sb.append(prefix);
                     if (toUpper) {
-                        sb.append(value.toUpperCase().replace("-", "_"));
+                        sb.append(value.toUpperCase().replace("-", "_").replace(".", "_"));
                     } else if (toLower) {
                         sb.append(value.toLowerCase().replace("_", "-"));
                     } else {
