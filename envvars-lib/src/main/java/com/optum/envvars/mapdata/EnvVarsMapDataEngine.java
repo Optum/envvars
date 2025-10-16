@@ -47,11 +47,13 @@ public class EnvVarsMapDataEngine {
         final Object schemaAsObject = rawSourceMap.get("schema");
         if (envVarsSchemaReader!=null && schemaAsObject!=null) {
             final String schemaAsString = schemaAsObject.toString();
-            final URL schemaUrl;
-            try {
-                schemaUrl = new URL(schemaAsString);
-            } catch (MalformedURLException e) {
-                throw new EnvVarsException("Unable to load EnvVars schema from: " + schemaAsString);
+            URL schemaUrl = getClass().getClassLoader().getResource(schemaAsString);
+            if (schemaUrl == null) {
+                try {
+                    schemaUrl = new URL(schemaAsString);
+                } catch (MalformedURLException e) {
+                    throw new EnvVarsException("Unable to load EnvVars schema from: " + schemaAsString);
+                }
             }
             this.envVarsStaticSchema = envVarsSchemaReader.buildFromURL(schemaUrl);
         } else {

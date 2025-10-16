@@ -34,11 +34,16 @@ public class YamlEnvVarsSchemaReader implements EnvVarsSchemaReader {
     public EnvVarsStaticSchema buildFromURL(URL url) throws EnvVarsException {
         final YamlLoadWrapper<SchemaYaml> yamlLoadWrapper = YamlLoadWrapper.fromURL(yaml, url);
         final SchemaYaml schemaYaml = yamlLoadWrapper.load();
+        System.out.println("Schema Definitions for " + url + ": " + schemaYaml.definitions);
 
         EnvVarsDefinitions envVarsDefinitions = new EnvVarsDefinitions();
         for(String definition : schemaYaml.definitions) {
             try {
-                EnvVarsDefinitions definitionsFromURL = new YamlEnvVarsDefinitionsReader().getFromURL(new URL(definition));
+                URL definitionUrl = getClass().getClassLoader().getResource(definition);
+                if (definitionUrl == null) {
+                    definitionUrl = new URL(definition);
+                }
+                EnvVarsDefinitions definitionsFromURL = new YamlEnvVarsDefinitionsReader().getFromURL(definitionUrl);
                 envVarsDefinitions.put(definitionsFromURL);
             } catch (MalformedURLException e) {
                 throw new EnvVarsException("Bad URL in Schema Definition: " + definition);
