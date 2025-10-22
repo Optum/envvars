@@ -43,16 +43,16 @@ jobs:
     name: Build Java - ${{ matrix.java }}
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Maven Prepare
         id: maven-prepare
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
-#          distribution: 'temurin'
+          distribution: 'temurin'
           server-id: ossrh
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_PASSWORD
+          server-username: MAVEN_CENTRAL_USERNAME
+          server-password: MAVEN_CENTRAL_TOKEN
           gpg-private-key: ${{ secrets.SONATYPE_GPG_PRIVATE_KEY }}
           gpg-passphrase: SONATYPE_GPG_PASSPHRASE
       - name: Build Maven Project
@@ -62,8 +62,8 @@ jobs:
         if: success() && (github.event_name == 'push' && matrix.java == env.PRIMARY_JAVA_VERSION)
         run: ./mvnw --batch-mode deploy -D ci.deploy
         env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
           SONATYPE_GPG_PASSPHRASE: ${{ secrets.SONATYPE_GPG_PASSPHRASE }}
       - name: Publish Test Report
         if: always()
