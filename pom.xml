@@ -68,9 +68,6 @@
         <groovy-eclipse-batch.version>2.4.21-01</groovy-eclipse-batch.version>
         <groovy-eclipse-compiler.version>2.9.2-01</groovy-eclipse-compiler.version>
 
-        <!-- PLUGIN PROPERTY OVERRIDES -->
-        <flatten.mode>ossrh</flatten.mode> <!-- flatten-maven-plugin -->
-
     </properties>
 
     <dependencyManagement>
@@ -301,7 +298,6 @@
                         </goals>
                         <phase>process-resources</phase>
                         <configuration>
-                            <flattenMode>${flatten.mode}</flattenMode>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </execution>
@@ -374,16 +370,6 @@
                     <name>ci.deploy</name>
                 </property>
             </activation>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
-                <repository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-                </repository>
-            </distributionManagement>
             <build>
                 <plugins>
                     <plugin>

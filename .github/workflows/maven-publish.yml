@@ -22,7 +22,7 @@ jobs:
           gpg-passphrase: SONATYPE_GPG_PASSPHRASE
       - name: Set version
         run: ./mvnw versions:set -DnewVersion=${{ github.event.release.tag_name }}
-      - name: Publish package
+      - name: Publish package to Maven Central Repository
         run: ./mvnw --batch-mode deploy -D ci.deploy
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
